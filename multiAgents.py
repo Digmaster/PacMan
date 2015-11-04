@@ -50,7 +50,6 @@ class ReflexAgent(Agent):
 
 		"Add more of your code here if you want to"
 
-		print gameState.getPacmanPosition()
 
 		return legalMoves[chosenIndex]
 
@@ -83,7 +82,7 @@ class ReflexAgent(Agent):
 			return newScore+1000
 
 		if(max(newScaredTimes)==40):
-			newScore = newScore + 40 #Weigh scores here we score a super pellot highly
+			newScore = newScore + 40 #Weigh scores here we score a super pellet highly
 
 		for i in range(len(newGhostStates)):
 			ghost = newGhostStates[i]
@@ -158,10 +157,57 @@ class MinimaxAgent(MultiAgentSearchAgent):
 		  gameState.getNumAgents():
 			Returns the total number of agents in the game
 		"""
-		"*** YOUR CODE HERE ***"
-		util.raiseNotDefined()
+		# Collect legal moves and successor states
+		legalMoves = gameState.getLegalActions()
 
-class AlphaBetaAgent(MultiAgentSearchAgent):
+		# Choose one of the best actions
+		scores = [self.decideMove(gameState, 0, gameState.getNumAgents()*self.depth, action) for action in legalMoves]
+		bestScore = max(scores)
+		bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
+		chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+
+		"Add more of your code here if you want to"
+
+		return legalMoves[chosenIndex]
+
+	def decideMove(self, gameState, player, depth, action):
+		gameState = gameState.generateSuccessor(player, action)
+		if gameState.isWin() or gameState.isLose(): # test for a winning solution to the current state
+			return self.evaluationFunction(gameState)
+
+		depth = depth-1
+
+		player = (player+1)%gameState.getNumAgents()
+
+		if(depth == 0):
+			return self.evaluationFunction(gameState)
+
+		if player==0:
+			legalMoves = gameState.getLegalActions()
+
+			# Choose one of the best actions
+			scores = [self.decideMove(gameState, 0, depth, action) for action in legalMoves]
+
+			bestScore = max(scores)
+			bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
+			chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+
+			return bestScore;
+		else:
+			legalMoves = gameState.getLegalActions(player)
+
+			# Choose one of the best actions
+			scores = [self.decideMove(gameState, player, depth, action) for action in legalMoves]
+
+			bestScore = min(scores)
+			bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
+			chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+
+			return bestScore;
+
+
+
+class AlphaBetaAgent(MultiAgentSearchAgent):	
 	"""
 	  Your minimax agent with alpha-beta pruning (question 3)
 	"""
