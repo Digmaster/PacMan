@@ -214,10 +214,68 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
 	def getAction(self, gameState):
 		"""
-		  Returns the minimax action using self.depth and self.evaluationFunction
+		  Returns the minimax action from the current gameState using self.depth
+		  and self.evaluationFunction.
+
+		  Here are some method calls that might be useful when implementing minimax.
+
+		  gameState.getLegalActions(agentIndex):
+			Returns a list of legal actions for an agent
+			agentIndex=0 means Pacman, ghosts are >= 1
+
+		  gameState.generateSuccessor(agentIndex, action):
+			Returns the successor game state after an agent takes an action
+
+		  gameState.getNumAgents():
+			Returns the total number of agents in the game
 		"""
-		"*** YOUR CODE HERE ***"
-		util.raiseNotDefined()
+		# Collect legal moves and successor states
+		legalMoves = gameState.getLegalActions()
+
+		# Choose one of the best actions
+		scores = [self.decideMove(gameState, 0, gameState.getNumAgents()*self.depth, action, -9999, 9999) for action in legalMoves]
+		bestScore = max(scores)
+		bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
+		chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+
+		"Add more of your code here if you want to"
+
+		return legalMoves[chosenIndex]
+
+	def decideMove(self, gameState, player, depth, action, alpha, beta):
+		gameState = gameState.generateSuccessor(player, action)
+		if gameState.isWin() or gameState.isLose(): # test for a winning solution to the current state
+			return self.evaluationFunction(gameState)
+
+		depth = depth-1
+
+		player = (player+1)%gameState.getNumAgents()
+
+		if(depth == 0):
+			return self.evaluationFunction(gameState)
+
+		if player==0:
+			legalMoves = gameState.getLegalActions()
+
+			# Choose one of the best actions
+			v = -999
+			for action in legalMoves:
+				v = max(v, self.decideMove(gameState, 0, depth, action, alpha, beta))
+				alpha = max(alpha, v)
+				if alpha > beta:
+					return v
+			return v;
+		else:
+			legalMoves = gameState.getLegalActions(player)
+
+			# Choose one of the best actions
+			v = 999
+			for action in legalMoves:
+				v = min(v, self.decideMove(gameState, player, depth, action, alpha, beta))
+				beta = min(beta, v)
+				if beta < alpha:
+					return v
+			return v;
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
 	"""
