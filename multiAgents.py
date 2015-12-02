@@ -211,26 +211,18 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 	"""
 	  Your minimax agent with alpha-beta pruning (question 3)
 	"""
-
+	alpha = -9999
+	beta = 9999
+	
 	def getAction(self, gameState):
 		"""
 		  Returns the minimax action from the current gameState using self.depth
 		  and self.evaluationFunction.
-
-		  Here are some method calls that might be useful when implementing minimax.
-
-		  gameState.getLegalActions(agentIndex):
-			Returns a list of legal actions for an agent
-			agentIndex=0 means Pacman, ghosts are >= 1
-
-		  gameState.generateSuccessor(agentIndex, action):
-			Returns the successor game state after an agent takes an action
-
-		  gameState.getNumAgents():
-			Returns the total number of agents in the game
 		"""
 		# Collect legal moves and successor states
 		legalMoves = gameState.getLegalActions()
+		if Directions.STOP in legalMoves: 
+			legalMoves.remove(Directions.STOP)
 
 		# Choose one of the best actions
 		scores = [self.decideMove(gameState, 0, gameState.getNumAgents()*self.depth, action, -9999, 9999) for action in legalMoves]
@@ -257,6 +249,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 		if player==0:
 			legalMoves = gameState.getLegalActions()
 
+			if Directions.STOP in legalMoves: 
+				legalMoves.remove(Directions.STOP)
+
 			# Choose one of the best actions
 			v = -9999
 			for action in legalMoves:
@@ -264,7 +259,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 				alpha = max(alpha, v)
 				if beta <= alpha:
 					return v
-			return v;
+			return v
 		else:
 			legalMoves = gameState.getLegalActions(player)
 
@@ -275,7 +270,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 				beta = min(beta, v)
 				if beta <= alpha:
 					return v
-			return v;
+			return v
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
 	"""
@@ -289,8 +284,20 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 		  All ghosts should be modeled as choosing uniformly at random from their
 		  legal moves.
 		"""
-		"*** YOUR CODE HERE ***"
-		util.raiseNotDefined()
+		# Collect legal moves and successor states
+		legalMoves = gameState.getLegalActions()
+		if Directions.STOP in legalMoves: 
+			legalMoves.remove(Directions.STOP)
+
+		# Choose one of the best actions
+		scores = [self.decideMove(gameState, 0, gameState.getNumAgents()*self.depth, action, -9999, 9999) for action in legalMoves]
+		bestScore = max(scores)
+		bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
+		chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+
+		"Add more of your code here if you want to"
+
+		return legalMoves[chosenIndex]
 
 def betterEvaluationFunction(currentGameState):
 	"""
