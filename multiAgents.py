@@ -257,7 +257,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 			for action in legalMoves:
 				v = max(v, self.decideMove(gameState, 0, depth, action, alpha, beta))
 				alpha = max(alpha, v)
-				if beta <= alpha:
+				if beta < alpha:
 					return v
 			return v
 		else:
@@ -268,7 +268,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 			for action in legalMoves:
 				v = min(v, self.decideMove(gameState, player, depth, action, alpha, beta))
 				beta = min(beta, v)
-				if beta <= alpha:
+				if beta < alpha:
 					return v
 			return v
 
