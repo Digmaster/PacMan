@@ -14,7 +14,7 @@
 
 from util import manhattanDistance
 from game import Directions
-import random, util
+import random, util, sys
 from pacman import GhostRules
 
 from game import Agent
@@ -211,8 +211,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 	"""
 	  Your minimax agent with alpha-beta pruning (question 3)
 	"""
-	alpha = -9999
-	beta = 9999
 	
 	def getAction(self, gameState):
 		"""
@@ -221,56 +219,75 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 		"""
 		# Collect legal moves and successor states
 		legalMoves = gameState.getLegalActions()
-		if Directions.STOP in legalMoves: 
-			legalMoves.remove(Directions.STOP)
 
 		# Choose one of the best actions
-		scores = [self.decideMove(gameState, 0, gameState.getNumAgents()*self.depth, action, -9999, 9999) for action in legalMoves]
-		bestScore = max(scores)
-		bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
-		chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+		v = -9999
+		best = v
+		bestAction = Directions.STOP
+		alpha = -9999
+		beta = 9999
+		for action in legalMoves:
+			v = self.decideMove(gameState, 0, gameState.getNumAgents()*self.depth-1, action, alpha, beta)
+
+			if v > alpha:
+				alpha = v
+
+			if v > best:
+				best = v
+				bestAction = action
+
+			if beta < alpha:
+				return best
+
+		#chosenIndex = random.choice(bestIndices) # Pick randomly among the best
 
 		"Add more of your code here if you want to"
 
-		return legalMoves[chosenIndex]
+		return bestAction
 
 	def decideMove(self, gameState, player, depth, action, alpha, beta):
 		gameState = gameState.generateSuccessor(player, action)
-		if gameState.isWin() or gameState.isLose(): # test for a winning solution to the current state
+		if gameState.isWin() or gameState.isLose() or depth == 0: # test for a winning solution to the current state
 			return self.evaluationFunction(gameState)
-
-		depth = depth-1
 
 		player = (player+1)%gameState.getNumAgents()
 
-		if(depth == 0):
-			return self.evaluationFunction(gameState)
-
 		if player==0:
-			legalMoves = gameState.getLegalActions()
-
-			if Directions.STOP in legalMoves: 
-				legalMoves.remove(Directions.STOP)
+			legalMoves = gameState.getLegalActions(player)
 
 			# Choose one of the best actions
 			v = -9999
+			best = v
 			for action in legalMoves:
-				v = max(v, self.decideMove(gameState, 0, depth, action, alpha, beta))
-				alpha = max(alpha, v)
+				v = self.decideMove(gameState, player, depth-1, action, alpha, beta)
+
+				if v > alpha:
+					alpha = v
+
+				if v > best:
+					best = v
+
 				if beta < alpha:
-					return v
-			return v
+					return best
+			return best
 		else:
 			legalMoves = gameState.getLegalActions(player)
 
 			# Choose one of the best actions
 			v = 9999
+			best = v
 			for action in legalMoves:
-				v = min(v, self.decideMove(gameState, player, depth, action, alpha, beta))
-				beta = min(beta, v)
+				v = self.decideMove(gameState, player, depth-1, action, alpha, beta)
+
+				if v < beta:
+					beta = v
+
+				if v < best:
+					best = v
+
 				if beta < alpha:
-					return v
-			return v
+					return best
+			return best
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
 	"""
@@ -290,14 +307,41 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 			legalMoves.remove(Directions.STOP)
 
 		# Choose one of the best actions
-		scores = [self.decideMove(gameState, 0, gameState.getNumAgents()*self.depth, action, -9999, 9999) for action in legalMoves]
-		bestScore = max(scores)
-		bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
-		chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+		v = -9999
+		best = v
+		bestAction = Directions.STOP
+		for action in legalMoves:
+			v = self.decideMove(gameState, 0, gameState.getNumAgents()*self.depth-1, action)
+			if v > best:
+				best = v
+				bestAction = action
 
-		"Add more of your code here if you want to"
+		return bestAction
 
-		return legalMoves[chosenIndex]
+	def decideMove(self, gameState, player, depth, action):
+		gameState = gameState.generateSuccessor(player, action)
+		if gameState.isWin() or gameState.isLose() or depth == 0: # test for a winning solution to the current state
+			return self.evaluationFunction(gameState)
+
+		player = (player+1)%gameState.getNumAgents()
+
+		if player==0:
+			legalMoves = gameState.getLegalActions(player)
+
+			# Choose one of the best actions
+			v = -9999
+			best = v
+			for action in legalMoves:
+				v = self.decideMove(gameState, player, depth-1, action)
+				if v > best:
+					best = v
+			return best
+		else:
+			legalMoves = gameState.getLegalActions(player)
+
+			scores = [self.decideMove(gameState, player, depth-1, action) for action in legalMoves]
+			return sum(scores)/len(scores)
+
 
 def betterEvaluationFunction(currentGameState):
 	"""
