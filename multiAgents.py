@@ -350,8 +350,47 @@ def betterEvaluationFunction(currentGameState):
 
 	  DESCRIPTION: <write something here so we know what you did>
 	"""
-	"*** YOUR CODE HERE ***"
-	util.raiseNotDefined()
+	# Useful information you can extract from a GameState (pacman.py)
+	newPos = currentGameState.getPacmanPosition()
+	newFood = currentGameState.getFood()
+	newGhostStates = currentGameState.getGhostStates()
+	newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+	newScore = currentGameState.getScore()
+
+	if currentGameState.isLose():
+		return newScore-1000
+	if currentGameState.isWin():
+		return newScore+1000
+
+	if(max(newScaredTimes)==40):
+		newScore = newScore + 40 #Weigh scores here we score a super pellet highly
+
+	ghostDistance = 0
+	for i in range(len(newGhostStates)):
+		ghost = newGhostStates[i]
+
+		#ignore ghosts you can eat
+		if(ghost.scaredTimer!=0):
+			ghostDistance -= manhattanDistance(ghost.getPosition(), newPos);
+			continue
+
+		i = i+1
+		newScore = newScore + ghost.scaredTimer
+		if(manhattanDistance(ghost.getPosition(), newPos) < 10):
+			ghostDistance += manhattanDistance(ghost.getPosition(), newPos);
+
+		# Check if the ghost can move into our square in the next turn
+		for ghostAction in GhostRules.getLegalActions(currentGameState, i):
+			ghostSuccessor = currentGameState.generateSuccessor(i, ghostAction)
+			if ghostSuccessor.getGhostState(i).getPosition() == newPos:
+				return newScore-1000
+
+	# if(len(currentGameState.getFoodCoords())==len(currentGameState.getFoodCoords())):
+	# 	newScore = newScore - currentGameState.getClosestFood(newPos)[2]
+
+	newScore += ghostDistance;
+
+	return newScore
 
 # Abbreviation
 better = betterEvaluationFunction
