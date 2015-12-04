@@ -303,8 +303,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 		"""
 		# Collect legal moves and successor states
 		legalMoves = gameState.getLegalActions()
-		if Directions.STOP in legalMoves: 
-			legalMoves.remove(Directions.STOP)
 
 		# Choose one of the best actions
 		v = -9999
@@ -362,8 +360,8 @@ def betterEvaluationFunction(currentGameState):
 	if currentGameState.isWin():
 		return newScore+1000
 
-	if(max(newScaredTimes)==40):
-		newScore = newScore + 40 #Weigh scores here we score a super pellet highly
+	#if(max(newScaredTimes)==40):
+	newScore = newScore + max(newScaredTimes)*1000 #Weigh scores here we score a super pellet highly
 
 	ghostDistance = 0
 	for i in range(len(newGhostStates)):
@@ -386,9 +384,8 @@ def betterEvaluationFunction(currentGameState):
 				return newScore-1000
 
 	# if(len(currentGameState.getFoodCoords())==len(currentGameState.getFoodCoords())):
-	# 	newScore = newScore - currentGameState.getClosestFood(newPos)[2]
-
-	newScore += ghostDistance;
+	#newScore = newScore - currentGameState.getClosestFood(newPos)[2]
+	newScore += ghostDistance/10;
 
 	return newScore
 
