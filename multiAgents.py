@@ -353,7 +353,7 @@ def betterEvaluationFunction(currentGameState):
 	newFood = currentGameState.getFood()
 	newGhostStates = currentGameState.getGhostStates()
 	newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
-	newScore = currentGameState.getScore()
+	newScore = currentGameState.getScore()*200
 
 	if currentGameState.isLose():
 		return newScore-1000
@@ -384,8 +384,8 @@ def betterEvaluationFunction(currentGameState):
 				return newScore-1000
 
 	# if(len(currentGameState.getFoodCoords())==len(currentGameState.getFoodCoords())):
-	#newScore = newScore - currentGameState.getClosestFood(newPos)[2]
-	newScore += ghostDistance/10;
+	newScore = newScore - currentGameState.getClosestFood(newPos)[2]
+	#newScore += ghostDistance/100;
 
 	return newScore
 
